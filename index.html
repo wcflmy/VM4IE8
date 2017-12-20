@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+  <script src="./src/es5-shim.js"></script>
+  <script src="./src/es5-sham.js"></script>
+  <script src="./src/observer.js"></script>
+  <script src="./src/watcher.js"></script>
+  <script src="./src/compile.js"></script>
+  <script src="./src/vm.js"></script>
+</head>
+
+<body>
+  <div id="app">
+    <span id="p">{{message}}</span>
+    <span>{{other.a}}</span>
+  </div>
+  <script>
+    var vm = new VM({
+      el: '#app',
+      data: {
+        message: 'xx',
+        other: {
+          a: 1
+        }
+      }
+    })
+  </script>
+</body>
+
+</html>
