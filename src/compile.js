@@ -90,6 +90,38 @@ Compile.prototype = {
     }
 };
 
+function addEventListener(element, type, handler) {
+  if (element.addEventListener) {
+    element.addEventListener(type, handler, false);
+  }
+  else if (element.attachEvent) {
+    //这里采用比上面更简单的方法来修正this指向问题，参考《Javascript.DOM高级程序设计》
+    //并且可以保证了可移除性
+    //若使用简单的匿名函数的话
+    //element.attachEvent("on"+type, function(e)
+    // {
+    // 		handler.call(element, window.event || e);
+    // });
+    // 则调用detachEvent("on"+type, handler)无法移除该事件
+    element["e" + type + handler] = handler;
+    element[type + handler] = function (e) {
+      element["e" + type + handler](e || window.event);
+      //handler.call(element, window.event);
+    };
+    element.attachEvent("on" + type, element[type + handler]);
+  }
+}
+
+function removeEventListener(element, type, handler) {
+  if (element.removeEventListener) {
+    element.removeEventListener(type, handler, false);
+  }
+  else if (element.detachEvent) {
+    element.detachEvent("on" + type, element[type + handler]);
+    element[type + handler] = null;
+    element["e" + type + handler] = null;
+  }
+}
 // 指令处理集合
 var compileUtil = {
     text: function(node, vm, exp) {
@@ -105,8 +137,8 @@ var compileUtil = {
 
         var me = this,
             val = this._getVMVal(vm, exp);
-        node.addEventListener('input', function(e) {
-            var newValue = e.target.value;
+        addEventListener(node, 'input', function(e) {
+            var newValue = (e.currentTarget||e.srcElement).value;
             if (val === newValue) {
                 return;
             }
@@ -114,6 +146,15 @@ var compileUtil = {
             me._setVMVal(vm, exp, newValue);
             val = newValue;
         });
+
+        addEventListener(node, 'propertychange', function(e) {
+          var newValue = (e.currentTarget||e.srcElement).value;
+          if(val === newValue) {
+            return;
+          }
+          me._setVMVal(vm, exp, newValue);
+          val = newValue;
+        })
     },
 
     'class': function(node, vm, exp) {
@@ -139,7 +180,7 @@ var compileUtil = {
             fn = vm.$options.methods && vm.$options.methods[exp];
 
         if (eventType && fn) {
-            node.addEventListener(eventType, fn.bind(vm), false);
+            addEventListener(node, eventType, fn.bind(vm), false);
         }
     },
 

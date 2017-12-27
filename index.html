@@ -3,33 +3,61 @@
 
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="X-UA-Compatible" content="ie=edge">
-  <title>Document</title>
+  <title>VM4IE8</title>
+</head>
+
+<body>
+
+  <div id="app">
+    <input type="text" v-model="someStr">
+    <input type="text" v-model="child.someStr">
+    <p v-class="className" class="abc">
+        {{someStr}}
+        <span v-text="child.someStr"></span>
+    </p>
+    <p>{{getHelloWord}}</p>
+    <p v-html="htmlStr"></p>
+    <div>
+    <span v-on:click="clickBtn">change model</span>
+    </div>
+  </div>
   <script src="./src/es5-shim.js"></script>
   <script src="./src/es5-sham.js"></script>
   <script src="./src/observer.js"></script>
   <script src="./src/watcher.js"></script>
   <script src="./src/compile.js"></script>
   <script src="./src/vm.js"></script>
-</head>
-
-<body>
-  <div id="app">
-    <span id="p">{{message}}</span>
-    <span>{{other.a}}</span>
-  </div>
   <script>
     var vm = new VM({
       el: '#app',
       data: {
-        message: 'xx',
-        other: {
-          a: 1
+        someStr: 'hello ',
+        className: 'btn',
+        htmlStr: '<span style="color: #f00;">red</span>',
+        child: {
+          someStr: 'World !'
+        }
+      },
+
+      computed: {
+        getHelloWord: function () {
+          return this.someStr + this.child.someStr;
+        }
+      },
+
+      methods: {
+        clickBtn: function (e) {
+          var randomStrArr = ['childOne', 'childTwo', 'childThree'];
+          this.child.someStr = randomStrArr[parseInt(Math.random() * 3)];
         }
       }
-    })
+    });
+
+    // vm.$watch('child.someStr', function () {
+    //   console.log(arguments);
+    // });
   </script>
+
 </body>
 
 </html>

@@ -14,7 +14,6 @@ Observer.create = function(value) {
   if (!value || typeof value !== 'object') {
     return;
   }
-
   return new Observer(value);
 }
 
