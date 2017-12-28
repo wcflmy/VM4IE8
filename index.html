@@ -1,61 +1,63 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8">
   <title>VM4IE8</title>
 </head>
-
 <body>
-
   <div id="app">
-    <input type="text" v-model="someStr">
-    <input type="text" v-model="child.someStr">
-    <p v-class="className" class="abc">
-        {{someStr}}
-        <span v-text="child.someStr"></span>
-    </p>
-    <p>{{getHelloWord}}</p>
-    <p v-html="htmlStr"></p>
-    <div>
-    <span v-on:click="clickBtn">change model</span>
-    </div>
+    <div>{{text}}</div>
+    <div v-text="text"></div>
+    <div v-html="html"></div>
+    <input type="text" v-model="model"><span>{{model}}</span>
+    <div class="none" :class="class"><span>I have a className of </span><span>{{class}}</span></div>
+    <div :style="cssString">I have a bule color.</div>
+    <div v-show="show" @click="handleClick">Click me!</div>
+    <div><span>{{say.hello}}</span><span>{{message}}</span></div>
+    <div>{{hello}}</div>
+    <div :data-message="message">I have a attribute of data-message</div>
   </div>
   <script src="./src/es5-shim.js"></script>
   <script src="./src/es5-sham.js"></script>
   <script src="./src/observer.js"></script>
   <script src="./src/watcher.js"></script>
+  <script src="./src/directive.js"></script>
   <script src="./src/compile.js"></script>
   <script src="./src/vm.js"></script>
   <script>
     var vm = new VM({
       el: '#app',
       data: {
-        someStr: 'hello ',
-        className: 'btn',
-        htmlStr: '<span style="color: #f00;">red</span>',
-        child: {
-          someStr: 'World !'
-        }
+        text: "I am some text!",
+        html: "<span style='color:red'>red html</span>",
+        model: "value",
+        'class': 'abc',
+        cssString: "color: blue",
+        bind: "bind",
+        show: true,
+        say: {
+          hello: "hello"
+        },
+        message: "everyone"
       },
 
       computed: {
-        getHelloWord: function () {
-          return this.someStr + this.child.someStr;
+        hello: function () {
+          return this.say.hello + ' ' + this.message
         }
       },
 
       methods: {
-        clickBtn: function (e) {
-          var randomStrArr = ['childOne', 'childTwo', 'childThree'];
-          this.child.someStr = randomStrArr[parseInt(Math.random() * 3)];
+        handleClick: function (e) {
+          this.show = false
         }
       }
-    });
+    })
 
-    // vm.$watch('child.someStr', function () {
-    //   console.log(arguments);
-    // });
+    vm.$watch('say.hello', function (val, oldVal) {
+      console.log('say.hello has Changed: the value is now ' + val + ', and old Value is ' + oldVal)
+      this.message = 'You changed'
+    })
   </script>
 
 </body>
