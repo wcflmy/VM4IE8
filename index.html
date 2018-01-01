@@ -12,14 +12,15 @@
     <input type="text" v-model="model"><span>{{model}}</span>
     <div class="none" :class="class"><span>I have a className of </span><span>{{class}}</span></div>
     <div :style="cssString">I have a bule color.</div>
-    <div v-show="show" @click="handleClick">Click me!</div>
+    <div v-show="show" @click="handleShowClick">Click me!</div>
     <div><span>{{say.hello}}</span><span>{{message}}</span></div>
-    <div>{{hello}}</div>
     <div :data-message="message">I have a attribute of data-message</div>
+    <div @click="handleComputedClick"><span>I am a computed value:</span>{{hello}}</div>
   </div>
   <script src="./src/es5-shim.js"></script>
   <script src="./src/es5-sham.js"></script>
   <script src="./src/observer.js"></script>
+  <script src="./src/batcher.js"></script>
   <script src="./src/watcher.js"></script>
   <script src="./src/directive.js"></script>
   <script src="./src/compile.js"></script>
@@ -48,14 +49,17 @@
       },
 
       methods: {
-        handleClick: function (e) {
+        handleShowClick: function (e) {
           this.show = false
+        },
+        handleComputedClick: function() {
+          this.say.hello = 'hi'
         }
       }
     })
 
     vm.$watch('say.hello', function (val, oldVal) {
-      console.log('say.hello has Changed: the value is now ' + val + ', and old Value is ' + oldVal)
+      console.log('say.hello has Changed: the value is now ' + val + ', and old value is ' + oldVal)
       this.message = 'You changed'
     })
   </script>

@@ -2,6 +2,8 @@ function VM(options) {
   return this._init(options)
 }
 
+VM.nextTick = nextTick
+
 VM.prototype._init = function(options) {
   this.$options = options || {}
   this._directives = []
@@ -89,4 +91,8 @@ VM.prototype.$mount = function(el) {
 
 VM.prototype.$watch = function(key, cb) {
   new Watcher(this, key, cb)
+}
+
+VM.prototype.$nextTick = function(cb) {
+  VM.nextTick(cb, this)
 }

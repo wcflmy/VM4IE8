@@ -17,7 +17,7 @@ function Watcher(vm, expOrFn, cb) {
 
 Watcher.prototype = {
   update: function () {
-    this.run()
+    batcher.push(this)
   },
   run: function () {
     var value = this.get()
