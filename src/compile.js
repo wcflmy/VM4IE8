@@ -31,11 +31,7 @@ Compile.prototype.compileNodeList = function(childNodes) {
   var self = this
 
   ;[].slice.call(childNodes).forEach(function (node) {
-    self.compileNode(node)
-
-    if (node.childNodes && node.childNodes.length) {
-      self.compileNodeList(node.childNodes)
-    }
+    self.compile(node)
   })
 }
 

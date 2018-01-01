@@ -7,6 +7,7 @@ VM.nextTick = nextTick
 VM.prototype._init = function(options) {
   this.$options = options || {}
   this._directives = []
+  this._watchers = []
 
   this._initMethods()
 
@@ -32,7 +33,7 @@ VM.prototype._initData = function() {
   data = observer.data
   this._keys = observer.keys
 
-  var proxy = document.createElement('div')
+  var proxy = document.createElement('null')
   this._domProxy = proxy
   proxy._data = data
 

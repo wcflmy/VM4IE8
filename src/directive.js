@@ -38,7 +38,13 @@ Directive.prototype._bind = function() {
 // directives
 Directive.text = {
   update: function(val) {
-    this.el.data = typeof val == 'undefined' ? '' : val
+    val = typeof val == 'undefined' ? '' : val
+    if(this.el.nodeType == 3) {
+      this.el.data = val          // for <span>{{text}}</span>
+    } else {                      // for <span v-text="text"></span>
+      this.el.textContent = val
+      this.el.innerText = val     // for IE8
+    }
   }
 }
 

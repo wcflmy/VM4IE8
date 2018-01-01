@@ -1,7 +1,8 @@
 function Observer(data) {
-  var proxy = document.createElement('div')
+  var proxy = document.createElement('null')
   var keys = Object.keys(data)
   var i = keys.length
+  // copy data to the proxy
   while (i--) {
     proxy[keys[i]] = JSON.parse(JSON.stringify(data[keys[i]]))
   }
