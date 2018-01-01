@@ -51,13 +51,16 @@ Directive.html = {
 Directive.model = {
   bind: function() {
     var self = this
-    addEventListener(this.el, 'input', function(e) {
+
+    this.el.addEventListener('propertychange', function (e) {
+      self._watcher.set(self.el.value)
+    })
+    
+    this.el.addEventListener('input', function(e) {
       self._watcher.set(self.el.value)
     })
 
-    addEventListener(this.el, 'propertychange', function(e) {
-      self._watcher.set(self.el.value)
-    })
+    
   },
   update: function(val) {
     this.el.value = typeof val == 'undefined' ? '' : val
@@ -95,41 +98,60 @@ Directive.bind = {
 Directive.on = {
   bind: function() {
     var self = this
-    addEventListener(this.el, this.descriptor.arg, function(e) {
+    this.el.addEventListener(this.descriptor.arg, function(e) {
       self.vm[self.descriptor.expression].call(self.vm, e)
     })
   }
 }
 
-function addEventListener(element, type, handler) {
-  if (element.addEventListener) {
-    element.addEventListener(type, handler, false)
-  }
-  else if (element.attachEvent) {
-    //这里采用比上面更简单的方法来修正this指向问题，参考《Javascript.DOM高级程序设计》
-    //并且可以保证了可移除性
-    //若使用简单的匿名函数的话
-    //element.attachEvent("on"+type, function(e)
-    // {
-    // 		handler.call(element, window.event || e)
-    // })
-    // 则调用detachEvent("on"+type, handler)无法移除该事件
-    element["e" + type + handler] = handler
-    element[type + handler] = function (e) {
-      element["e" + type + handler](e || window.event)
-      //handler.call(element, window.event)
+// From here: https://msdn.microsoft.com/en-us/library/dd229916(VS.85).aspx
+if(!document.addEventListener) {
+  Element.prototype.addEventListener =
+  Window.prototype.addEventListener = function (type, fCallback, capture) {
+    var modtypeForIE = "on" + type
+    if (capture) {
+      throw new Error("This implementation of addEventListener does not support the capture phase")
     }
-    element.attachEvent("on" + type, element[type + handler])
+    var nodeWithListener = this
+    this.attachEvent(modtypeForIE, function (e) {
+      // Add some extensions directly to 'e' (the actual event instance)
+      // Create the 'currentTarget' property (read-only)
+      Object.defineProperty(e, 'currentTarget', {
+        get: function () {
+          // 'nodeWithListener' as defined at the time the listener was added.
+          return nodeWithListener
+        }
+      })
+      // Create the 'eventPhase' property (read-only)
+      Object.defineProperty(e, 'eventPhase', {
+        get: function () {
+          return (e.srcElement == nodeWithListener) ? 2 : 3 // "AT_TARGET" = 2, "BUBBLING_PHASE" = 3
+        }
+      })
+      // Create a 'timeStamp' (a read-only Date object)
+      var time = new Date() // The current time when this anonymous function is called.
+      Object.defineProperty(e, 'timeStamp', {
+        get: function () {
+          return time
+        }
+      })
+      // Call the function handler callback originally provided...
+      fCallback.call(nodeWithListener, e) // Re-bases 'this' to be correct for the callback.
+    })
   }
-}
 
-function removeEventListener(element, type, handler) {
-  if (element.removeEventListener) {
-    element.removeEventListener(type, handler, false)
+  // Extend Event.prototype with a few of the W3C standard APIs on Event
+  // Add 'target' object (read-only)
+  Object.defineProperty(Event.prototype, 'target', {
+    get: function () {
+      return this.srcElement
+    }
+  })
+  // Add 'stopPropagation' and 'preventDefault' methods
+  Event.prototype.stopPropagation = function () {
+    this.cancelBubble = true
   }
-  else if (element.detachEvent) {
-    element.detachEvent("on" + type, element[type + handler])
-    element[type + handler] = null
-    element["e" + type + handler] = null
+  Event.prototype.preventDefault = function () {
+    this.returnValue = false
   }
 }
