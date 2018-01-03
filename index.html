@@ -56,8 +56,15 @@
       },
 
       computed: {
-        hello: function () {
-          return this.say.hello + ' ' + this.message
+        hello: {
+          get: function() {
+            return this.say.hello + ' ' + this.message
+          },
+          set: function(val) {
+            val = val.split(' ')
+            this.say.hello = val[0]
+            this.say.message = val[1]
+          }
         }
       },
 

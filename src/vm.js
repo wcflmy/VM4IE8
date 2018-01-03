@@ -54,7 +54,9 @@ VM.prototype._initComputed = function() {
         get: typeof computed[key] === 'function'
           ? computed[key]
           : computed[key].get,
-        set: function () { }
+        set: typeof computed[key] === 'function'
+          ? function () { }
+          : computed[key].set
       })
     })
   }
