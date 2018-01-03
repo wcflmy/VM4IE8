@@ -6,16 +6,28 @@
 </head>
 <body>
   <div id="app">
-    <div>{{text}}</div>
-    <div v-text="text"></div>
-    <div v-html="html"></div>
-    <input type="text" v-model="model"><span>{{model}}</span>
-    <div class="none" :class="class"><span>I have a className of </span><span>{{class}}</span></div>
-    <div :style="cssString">I have a bule color.</div>
-    <div v-show="show" @click="handleShowClick">Click me!</div>
-    <div><span>{{say.hello}}</span><span>{{message}}</span></div>
-    <div :data-message="message">I have a attribute of data-message</div>
-    <div @click="handleComputedClick"><span>I am a computed value:</span>{{hello}}</div>
+    <div v-if="ifShow">Just input 'vm.ifShow=false' in console</div>
+    <div v-else>
+      <div>{{text}}</div>
+      <div v-text="text"></div>
+      <div v-html="html"></div>
+      <input type="text" v-model="model">
+      <span>{{model}}</span>
+      <div class="none" :class="class">
+        <span>I have a className of </span>
+        <span>{{class}}</span>
+      </div>
+      <div :style="cssString">I have a bule color.</div>
+      <div v-show="show" @click="handleShowClick">Click me!</div>
+      <div>
+        <span>{{say.hello}}</span>
+        <span>{{message}}</span>
+      </div>
+      <div :data-message="message">I have a attribute of data-message</div>
+      <div @click="handleComputedClick">
+        <span>I am a computed value:</span>{{hello}}
+      </div>
+    </div>
   </div>
   <script src="./src/es5-shim.js"></script>
   <script src="./src/es5-sham.js"></script>
@@ -39,7 +51,8 @@
         say: {
           hello: "hello"
         },
-        message: "everyone"
+        message: "everyone",
+        ifShow: true
       },
 
       computed: {

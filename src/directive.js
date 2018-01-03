@@ -12,9 +12,12 @@ Directive.prototype._bind = function() {
     this.el.removeAttribute(this.descriptor.attr || 'v-' + this.descriptor.name)
   }
 
-  this.update = (Directive[this.descriptor.name] || {}).update
+  var def = Directive[this.descriptor.name] || {}
+  // extend bind, update functions to the instance of Directive for fixing `this`
+  for(var i in def) {
+    this[i] = def[i]
+  }
 
-  this.bind = (Directive[this.descriptor.name] || {}).bind
   if(this.bind) {
     this.bind()
   }
@@ -58,15 +61,14 @@ Directive.model = {
   bind: function() {
     var self = this
 
+    // for IE8
     this.el.addEventListener('propertychange', function (e) {
       self._watcher.set(self.el.value)
     })
     
     this.el.addEventListener('input', function(e) {
       self._watcher.set(self.el.value)
-    })
-
-    
+    }) 
   },
   update: function(val) {
     this.el.value = typeof val == 'undefined' ? '' : val
@@ -99,6 +101,45 @@ Directive.bind = {
     if(val != null && val !== false)
     this.el.setAttribute(this.descriptor.arg, val)
   }
+}
+
+Directive['if'] = {
+  bind: function() {
+    var next = this.el.nextElementSibling
+    var parent = this.el.parentNode
+    if (next && next.getAttribute('v-else') !== null) {
+      next.removeAttribute('v-else')
+      this.elseEl = next
+      parent.removeChild(next)
+      new Compile(this.elseEl, this.vm)
+    }
+    this.anchor = document.createTextNode('')
+    // give a anchor for holding the place
+    parent.replaceChild(this.anchor, this.el)
+    new Compile(this.el, this.vm)
+  },
+  update: function(value) {
+    var trueEl = value ? this.el : this.elseEl
+    var falseEl = value ? this.elseEl : this.el
+    var parent = this.anchor.parentNode
+    try {
+      parent.removeChild(falseEl)
+    } catch(e) {}
+    parent.insertBefore(trueEl, this.anchor)
+  }
+}
+
+// for IE8
+if(!document.addEventListener) {
+  Object.defineProperty(Element.prototype, 'nextElementSibling', {
+    get: function() {
+      var ele = this;
+      do {
+        ele = ele.nextSibling;
+      } while (ele && ele.nodeType !== 1);
+      return ele;
+    }
+  })
 }
 
 Directive.on = {
