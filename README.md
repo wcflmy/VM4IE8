@@ -68,7 +68,7 @@ This is a library for learning vue, so DONOT use it in your production environme
 ## Supported Features
 - reactive two-way data binding.
 - computed property.
-- directives: v-text, v-html, v-model, v-show, v-bind, v-on.
+- directives: v-text, v-html, v-model, v-show, v-bind, v-on, v-if/v-else.
 - IE8 supported.
 
 ## Limitations
