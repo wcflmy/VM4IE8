@@ -27,6 +27,11 @@
       <div @click="handleComputedClick">
         <span>I am a computed value:</span>{{hello}}
       </div>
+      <ul>
+        <li v-for="item in list" :style="cssString">
+          {{item.name}}
+        </li>
+      </ul>
     </div>
   </div>
   <script src="./src/es5-shim.js"></script>
@@ -52,7 +57,15 @@
           hello: "hello"
         },
         message: "everyone",
-        ifShow: true
+        ifShow: true,
+        list: [
+          {
+            name: 1
+          },
+          {
+            name: 2
+          }
+        ]
       },
 
       computed: {

@@ -1,8 +1,12 @@
-function Watcher(vm, expOrFn, cb) {
+function Watcher(vm, expOrFn, cb, options) {
   this.cb = cb
   this.vm = vm
   this.expOrFn = expOrFn
   this.depIds = {}
+
+  for (var i in options) {
+    this[i] = options[i]
+  }
 
   if (typeof expOrFn === 'function') {
     this.getter = expOrFn
@@ -37,6 +41,9 @@ Watcher.prototype = {
   get: function () {
     Dep.target = this
     var value = this.getter.call(this.vm, this.vm)
+    if(this.process) {
+      value = this.process(value)
+    }
     Dep.target = null
     return value
   },

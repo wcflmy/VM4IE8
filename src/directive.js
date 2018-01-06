@@ -32,7 +32,9 @@ Directive.prototype._bind = function() {
     this._update = function() {}
   }
 
-  var watcher = this._watcher = new Watcher(this.vm, this.descriptor.expression, this._update)
+  var watcher = this._watcher = new Watcher(this.vm, this.descriptor.expression, this._update, {
+    process: this.process
+  })
   if(this.update) {
     this.update(watcher.value)
   }
@@ -140,6 +142,71 @@ if(!document.addEventListener) {
       return ele;
     }
   })
+}
+
+Directive['for'] = {
+  bind: function() {
+    var inMatch = this.descriptor.expression.match(/(.*) in (.*)/)
+    if (inMatch) {
+      this.alias = inMatch[1].trim()
+      this.descriptor.expression = inMatch[2].trim()
+    }
+    var parent = this.el.parentNode
+    this.anchor = document.createTextNode('')
+    this.template = this.el.cloneNode(true)
+    parent.replaceChild(this.anchor, this.el)
+  },
+  update: function(value) {
+    var parent = this.anchor.parentNode
+    while(this.anchor !== parent.firstChild) {
+      parent.removeChild(parent.firstChild)
+    }
+    this.frag = document.createDocumentFragment()
+    for(var i=0; i<value.length; i++) {
+      this.el = this.template.cloneNode(true)
+      // create a new scope
+      var scope = new VM({
+        data: this.vm._data
+      })
+      defineReactive(scope, this.alias, value[i].$value)
+      defineReactive(scope, value[i].$key, value[i].$value)
+      new Compile(this.el, scope)
+      this.frag.appendChild(this.el)
+    }
+    parent.insertBefore(this.frag, this.anchor)
+    this.frag = null
+  },
+  process: function(value) {
+    if (typeof value === 'object') {
+      var keys = value.__ob__.keys
+      var i = keys.length
+      var res = new Array(i)
+      var key
+      while (i--) {
+        key = keys[i]
+        res[i] = {
+          $key: key,
+          $value: value[key]
+        }
+      }
+      return res
+    } else {
+      var type = typeof value
+      if (type === 'number') {
+        value = range(value)
+      }
+      return value || []
+    }
+
+    function range(n) {
+      var i = -1
+      var ret = new Array(n)
+      while (++i < n) {
+        ret[i] = i
+      }
+      return ret
+    }
+  }
 }
 
 Directive.on = {
