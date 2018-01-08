@@ -29,7 +29,9 @@
       </div>
       <ul>
         <li v-for="item in list" :style="cssString">
-          {{item.name}}
+          <ul>
+            <li v-for="i in item">{{i}}</li>
+          </ul>
         </li>
       </ul>
     </div>
@@ -60,10 +62,12 @@
         ifShow: true,
         list: [
           {
-            name: 1
+            name: 'a',
+            age: 1
           },
           {
-            name: 2
+            name: 'b',
+            age: 2
           }
         ]
       },

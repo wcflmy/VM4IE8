@@ -89,6 +89,8 @@ VM.prototype._bindDir = function(dir, el) {
 }
 
 VM.prototype.$mount = function(el) {
+  el = el.nodeType === 1 ? el : document.querySelector(el)
+  el = Compile.transclude(el, this.$options)
   this.$compile = new Compile(el, this._domProxy)
 }
 

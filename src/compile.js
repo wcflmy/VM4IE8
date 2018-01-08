@@ -4,8 +4,7 @@ var argRE = /:(.*)$/
 
 function Compile(el, vm) {
   this.$vm = vm
-  this.$el = el.nodeType == 1 ? el : document.querySelector(el)
-
+  this.$el = el
   if (this.$el) {
     this.compile(this.$el)
   }
@@ -96,4 +95,49 @@ Compile.prototype.compileTextNode = function(node) {
     this.$vm._directives.push(directive)
     directive._bind()
   }
+}
+
+Compile.transclude = function (el, options) {
+  function nodeToFragment(node) {
+    // script template
+    if (node.tagName === 'SCRIPT') {
+      return stringToFragment(node.textContent)
+    }
+    var frag = document.createDocumentFragment()
+    var child
+    while (child = clone.firstChild) {
+      frag.appendChild(child)
+    }
+    return frag
+  }
+
+  function stringToFragment(string) {
+    var frag = document.createDocumentFragment()
+    var node = document.createElement('div')
+    node.innerHTML = string
+    var child
+    while (child = node.firstChild) {
+      frag.appendChild(child)
+    }
+    return frag
+  }
+
+  if (options && options.template) {
+    var template = options.template
+    var frag
+    if (typeof template === 'string') {
+      if (template.charAt(0) === '#') {
+        var node = document.getElementById(template.slice(1))
+        if (node) {
+          frag = nodeToFragment(node)
+        }
+      } else {
+        frag = stringToFragment(template)
+      }
+    } else if (template.nodeType) {
+      frag = nodeToFragment(template)
+    }
+    el.appendChild(frag)
+  }
+  return el
 }
