@@ -6,21 +6,25 @@ VM.nextTick = nextTick
 
 VM.prototype._init = function(options) {
   this.$options = options || {}
-  this._directives = []
-  this._watchers = []
 
-  this._initMethods()
-
-  this._initData()
-
-  this._initComputed()
-
+  // create dom proxy
+  this._domProxy = createDomProxy()
   for (var i in this) {
-    this._domProxy[i] = this[i]
+    var v = this[i]
+    this._domProxy[i] = v
   }
 
+  this._domProxy._directives = []
+  this._domProxy._watchers = []
+
+  this._domProxy._initMethods()
+
+  this._domProxy._initData()
+
+  this._domProxy._initComputed()
+
   if (options.el) {
-    this.$mount(options.el)
+    this._domProxy.$mount(options.el)
   }
 
   return this._domProxy
@@ -30,12 +34,8 @@ VM.prototype._initData = function() {
   var data = this.$options.data
   var observer = Observer.create(data)
 
-  data = observer.data
   this._keys = observer.keys
-
-  var proxy = document.createElement('null')
-  this._domProxy = proxy
-  proxy._data = data
+  this._data = observer.data
 
   var i, key
   i = this._keys.length
@@ -46,11 +46,10 @@ VM.prototype._initData = function() {
 }
 
 VM.prototype._initComputed = function() {
-  var proxy = this._domProxy
   var computed = this.$options.computed
   if (typeof computed === 'object') {
     Object.keys(computed).forEach(function (key) {
-      Object.defineProperty(proxy, key, {
+      Object.defineProperty(this, key, {
         get: typeof computed[key] === 'function'
           ? computed[key]
           : computed[key].get,
@@ -72,26 +71,25 @@ VM.prototype._initMethods = function() {
 }
 
 VM.prototype._proxy = function(key) {
-  var self = this
-  Object.defineProperty(self._domProxy, key, {
+  Object.defineProperty(this, key, {
     configurable: true,
     get: function proxyGetter() {
-      return self._domProxy._data[key]
+      return this._data[key]
     },
     set: function proxySetter(val) {
-      self._domProxy._data[key] = val
+      this._data[key] = val
     }
   })
 }
 
 VM.prototype._bindDir = function(dir, el) {
-  this._domProxy._directives.push(new Directive(dir, this._domProxy, el))
+  this._directives.push(new Directive(dir, this, el))
 }
 
 VM.prototype.$mount = function(el) {
   el = el.nodeType === 1 ? el : document.querySelector(el)
   el = Compile.transclude(el, this.$options)
-  this.$compile = new Compile(el, this._domProxy)
+  this.$compile = new Compile(el, this)
 }
 
 VM.prototype.$watch = function(key, cb) {

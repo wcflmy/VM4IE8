@@ -1,5 +1,5 @@
 function Observer(data) {
-  var proxy = document.createElement('null')
+  var proxy = createDomProxy()
   var keys = Object.keys(data)
   var i = keys.length
   // copy data to the proxy
@@ -70,6 +70,22 @@ var defineReactive = Observer.prototype.defineReactive = function (obj, key, val
       dep.notify()
     }
   })
+}
+
+function createDomProxy() {
+  var proxy = document.createElement('null')
+    // copy Object.prototype's functions to proxy
+    ;[
+      'hasOwnProperty',
+      'isPrototypeOf',
+      'propertyIsEnumerable',
+      'toLocaleString',
+      'toString',
+      'valueOf'
+    ].forEach(function (method) {
+      proxy[method] = Object.prototype[method]
+    })
+  return proxy
 }
 
 var uid = 0
