@@ -165,9 +165,12 @@ Directive['for'] = {
     for(var i=0; i<value.length; i++) {
       this.el = this.template.cloneNode(true)
       // create a new scope
-      var scope = new VM({
+      var options = Object.assign({}, this.vm.$options, {
         data: this.vm._data
       })
+      // remove el for no compiling
+      delete options.el
+      var scope = new VM(options)
       defineReactive(scope, this.alias, value[i].$value)
       defineReactive(scope, value[i].$key, value[i].$value)
       new Compile(this.el, scope)
