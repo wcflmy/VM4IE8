@@ -57,7 +57,7 @@ VM.prototype._initComputed = function() {
           ? function () { }
           : computed[key].set
       })
-    })
+    }.bind(this))
   }
 }
 
